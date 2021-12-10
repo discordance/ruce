@@ -5,7 +5,7 @@ include_cpp! {
     
     safety!(unsafe)
     generate!("ruce::Dummy")
-    // generate!("ruce::create_new_AudioBufferFloat")
+    generate!("ruce::testing_juce")
 }
 
 #[cfg(test)]
