@@ -1,8 +1,24 @@
+use autocxx::include_cpp;
+
+include_cpp! {
+    #include "defs.h"
+    
+    safety!(unsafe)
+    generate!("ruce::Dummy")
+    // generate!("ruce::create_new_AudioBufferFloat")
+}
+
 #[cfg(test)]
 mod tests {
+
+    // use crate::ffi::juce::ADSR;
+    // use crate::ffi::ruce::create_new_AudioBufferFloat;
+
     #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
+    fn test_1() {
+        // let adsr = ADSR::make_unique();
+        // let ns = adsr.getParameters();
+
+        // let buffer = create_new_AudioBufferFloat();
     }
 }
