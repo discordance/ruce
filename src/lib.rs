@@ -1,24 +1,44 @@
-use autocxx::include_cpp;
+// Extract meat from C++ 
+#[cxx::bridge]
+pub mod ffi {
+    unsafe extern "C++" {
+        include!("ruce/wrap/ruce.h");
 
-include_cpp! {
-    #include "defs.h"
-    
-    safety!(unsafe)
-    generate!("ruce::Dummy")
-    generate!("ruce::testing_juce")
+        // wrapper type
+        type RuceAudioProcessor;
+
+        #[namespace = "juce"]
+        type AudioProcessor;
+
+        // this should be found in the global namespace
+        fn createPluginFilter() -> *mut AudioProcessor;
+
+        // VST3
+        #[namespace = "Steinberg"]
+        type IPluginFactory;
+
+        fn GetPluginFactory() -> *mut IPluginFactory;
+    }
 }
+
+
+#[no_mangle]
+pub fn lola_aime_ca() {
+
+}
+
+#[no_mangle]
+#[allow(non_snake_case)]
+fn GetPluginFactory() -> *mut ffi::IPluginFactory {
+    return ffi::GetPluginFactory();
+}
+
 
 #[cfg(test)]
 mod tests {
 
-    // use crate::ffi::juce::ADSR;
-    // use crate::ffi::ruce::create_new_AudioBufferFloat;
-
     #[test]
-    fn test_1() {
-        // let adsr = ADSR::make_unique();
-        // let ns = adsr.getParameters();
+    fn test() {
 
-        // let buffer = create_new_AudioBufferFloat();
     }
 }
