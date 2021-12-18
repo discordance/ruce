@@ -5,12 +5,15 @@ fn main() {
     let target_os = env::var("CARGO_CFG_TARGET_OS");
 
     // the builder
-    let mut b = cxx_build::bridge("src/lib.rs");
+    let mut b = cxx_build::bridges(&["src/lib.rs", "src/ruce_types.rs"]);
+
+    // defines
+    // .define("APP_NAME", "\"foo\"")
 
     // include paths
     b.include("wrap");
-    b.include(".juce/modules");
-    b.include(".juce/modules/juce_audio_processors/format_types/VST3_SDK");
+    b.include("../.juce/modules");
+    b.include("../.juce/modules/juce_audio_processors/format_types/VST3_SDK");
     b.cpp(true);
 
     // flags
@@ -27,8 +30,9 @@ fn main() {
             b.file("wrap/library_code/juce_gui_basics.mm");
             b.file("wrap/library_code/juce_audio_processors.mm");
             b.file("wrap/library_code/juce_audio_plugin_client.mm");
-
-            b.file("wrap/library_code/patch_juce_VST3.mm");
+            
+            // extra implem
+            b.file("wrap/library_code/juce_VST_mac.mm");
         }
         _ => {
             b.file("wrap/library_code/juce_core.cpp");
@@ -59,7 +63,10 @@ fn main() {
     }
 
     println!("cargo:rerun-if-changed=src/lib.rs");
+    println!("cargo:rerun-if-changed=src/ruce_types.rs");
+
     println!("cargo:rerun-if-changed=wrap/ruce.h");
+    println!("cargo:rerun-if-changed=wrap/vst3_shim.h");
     println!("cargo:rerun-if-changed=wrap/juce_conf.h");
 
     // lib files
@@ -79,4 +86,9 @@ fn main() {
     println!("cargo:rerun-if-changed=wrap/library_code/juce_audio_processors.mm");
     println!("cargo:rerun-if-changed=wrap/library_code/juce_audio_plugin_client.cpp");
     println!("cargo:rerun-if-changed=wrap/library_code/juce_audio_plugin_client.mm");
+
+    println!("cargo:rerun-if-changed=wrap/library_code/juce_VST_mac.mm");
+    println!("cargo:rerun-if-changed=wrap/library_code/patch_juce_audio_plugin_client_VST3.cpp");
+
+    println!("cargo:rerun-if-changed=build.rs");
 }

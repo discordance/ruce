@@ -7,10 +7,18 @@
 #include <juce_audio_plugin_client/juce_audio_plugin_client.h>
 
 // VST 3
-#include <juce_audio_plugin_client/juce_audio_plugin_client_VST3.cpp>
+#include "library_code/patch_juce_audio_plugin_client_VST3.cpp"
+
+// Mac workarounds
+#if JUCE_MAC
+typedef __CFBundle CFBundleAlias;
+#endif
+
+// import some cxx tools
+#include "rust/cxx.h"
 
 // import Rust code defined in 
-// #include "ruce/src/lib.rs.h"
+#include "ruce/src/ruce_types.rs.h"
 
 // The main AudioProcessor class that extends JUCE Audio Processor
 // It will delegate all the calls to the Rust code instead.
@@ -18,7 +26,7 @@ class RuceAudioProcessor : public juce::AudioProcessor
 {
 public:
     //==============================================================================
-    RuceAudioProcessor() : AudioProcessor(BusesProperties()
+    RuceAudioProcessor(rust::Box<::PluginProcessorImpl> implWrapper) : AudioProcessor(BusesProperties()
 #if !JucePlugin_IsMidiEffect
 #if !JucePlugin_IsSynth
                                               .withInput("Input", juce::AudioChannelSet::stereo(), true)
@@ -27,20 +35,22 @@ public:
 #endif
                            )
     {
-        // @TODO
+        // move the impl wrapper and own memory
+        _implWrapper = std::make_unique<rust::Box<::PluginProcessorImpl>>(std::move(implWrapper));
     }
 
     ~RuceAudioProcessor()
     {
-        // @TODO
+        // _implWrapper should be disposed 
     }
 
     //==============================================================================
     void prepareToPlay(double sampleRate, int samplesPerBlock) override
     {
-        // Use this method as the place to do any pre-playback
-        // initialisation that you need..
-        juce::ignoreUnused(sampleRate, samplesPerBlock);
+        // grab a mut ref via the boxed impl
+        PluginProcessorImpl& w = **(_implWrapper.get());
+        // delegate
+        prepare_to_play(w, sampleRate, samplesPerBlock);
     }
 
     void releaseResources() override
@@ -199,12 +209,21 @@ public:
     }
 
 private:
+    // manage memory of the wrapper
+    std::unique_ptr<rust::Box<::PluginProcessorImpl>> _implWrapper;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RuceAudioProcessor)
 };
 
+// struct PluginProcessorImpl {
+//     using IsRelocatable = std::true_type;
+// };
+
 // This creates new instances of the plugin..
 juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter()
 {
-    return new RuceAudioProcessor();
+    rust::Box<::PluginProcessorImpl> impl =  create_plugin_impl();
+    return new RuceAudioProcessor(std::move(impl));
 }
+

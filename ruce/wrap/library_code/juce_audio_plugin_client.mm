@@ -2,4 +2,4 @@
 
 // here we include all the formats we want
 // VST3 
-#include <juce_audio_plugin_client/juce_audio_plugin_client_VST3.cpp>
+#include "patch_juce_audio_plugin_client_VST3.cpp"

@@ -1,15 +1,16 @@
+[workspace]
+
 [package]
-name = "ruce"
+name = "ruce_bindings"
 version = "0.1.0"
 edition = "2021"
 
-[lib]
-crate-type = ["rlib"]
+
+# members = [
+#     "ruce",
+#     "ruce_vst3",
+# ]
 
 [dependencies]
-cxx = "1.0.54"
-
-[build-dependencies]
-cc = { version = "1.0", features = ["parallel"] }
-walkdir = "2"
-cxx-build = "1.0"
+ruce = { path = "./ruce" }
+ruce_vst3 = { path = "./ruce_vst3" }
