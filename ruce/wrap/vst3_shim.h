@@ -29,9 +29,12 @@ namespace ruce
                                                     JucePlugin_Manufacturer,
                                                     JucePlugin_VersionString,
                                                     kVstVersionString);
-
+            // use a closure
             globalFactory->registerClass(componentClass, [] (Vst::IHostApplication *host) -> FUnknown*
-                                         { return static_cast<Vst::IAudioProcessor *>(new JuceVST3Component(host)); });
+                                         { 
+                                            RuceAudioProcessor n = new RuceAudioProcessor(std::move(_implOwned));
+                                            return static_cast<Vst::IAudioProcessor *>(new JuceVST3Component(host)); 
+                                        });
 
             static const PClassInfo2 controllerClass(JuceVST3EditController::iid,
                                                      PClassInfo::kManyInstances,
