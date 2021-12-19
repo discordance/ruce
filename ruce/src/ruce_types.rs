@@ -17,7 +17,7 @@ unsafe impl ExternType for PluginProcessorImpl {
 pub struct RealProcessorType {}
 impl PluginProcessor for RealProcessorType {
     fn prepare_to_play(&mut self, _sample_rate: f32, _maximum_expected_samples_per_block: usize) {
-        println!("{}", "Crate Placeholder");
+        println!("{}", "Crate Placeholder HAHA dtc");
     }
 
     fn new() -> Self where Self: Sized {

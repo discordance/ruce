@@ -26,7 +26,7 @@ class RuceAudioProcessor : public juce::AudioProcessor
 {
 public:
     //==============================================================================
-    RuceAudioProcessor(rust::Box<::PluginProcessorImpl> implWrapper) : AudioProcessor(BusesProperties()
+    RuceAudioProcessor() : AudioProcessor(BusesProperties()
 #if !JucePlugin_IsMidiEffect
 #if !JucePlugin_IsSynth
                                               .withInput("Input", juce::AudioChannelSet::stereo(), true)
@@ -35,21 +35,29 @@ public:
 #endif
                            )
     {
-        // move the impl wrapper and own memory
-        _implWrapper = std::make_unique<rust::Box<::PluginProcessorImpl>>(std::move(implWrapper));
+
     }
 
     ~RuceAudioProcessor()
     {
-        // _implWrapper should be disposed 
+        // _implWrapper should be disposed automatically
+    }
+
+    // Sets the rust wrapper
+    void setImplWrapper(rust::Box<::PluginProcessorImpl> implWrapper)
+    {
+        // move the impl wrapper and own memory
+        _implWrapper = std::make_unique<rust::Box<::PluginProcessorImpl>>(std::move(implWrapper));
     }
 
     //==============================================================================
     void prepareToPlay(double sampleRate, int samplesPerBlock) override
     {
-        // grab a mut ref via the boxed impl
+        assert(_implWrapper != nullptr);
+
+        // // grab a mut ref via the boxed impl
         PluginProcessorImpl& w = **(_implWrapper.get());
-        // delegate
+        // // delegate
         prepare_to_play(w, sampleRate, samplesPerBlock);
     }
 
@@ -216,14 +224,11 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RuceAudioProcessor)
 };
 
-// struct PluginProcessorImpl {
-//     using IsRelocatable = std::true_type;
-// };
-
-// This creates new instances of the plugin..
+// This create a new instance of the plugin
+// we pass the Rust impl later via the plugin factory
 juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter()
 {
-    rust::Box<::PluginProcessorImpl> impl =  create_plugin_impl();
-    return new RuceAudioProcessor(std::move(impl));
+    RuceAudioProcessor* instance = new RuceAudioProcessor();
+    return instance;
 }
 

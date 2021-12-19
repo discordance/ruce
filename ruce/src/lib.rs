@@ -24,8 +24,8 @@ pub mod ffi {
         type CFBundleAlias;
         
         #[namespace = "ruce"]
-        unsafe fn GetPluginFactoryShim(_impl: *mut PluginProcessorImpl) -> *mut IPluginFactory;
-
+        unsafe fn GetPluginFactoryShim(_impl: fn() -> *mut PluginProcessorImpl) -> *mut IPluginFactory;
+        
         unsafe fn bundleEntry(r: *mut CFBundleAlias) -> bool;
         fn bundleExit() -> bool;
     }
