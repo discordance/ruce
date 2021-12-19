@@ -13,6 +13,9 @@ pub mod ffi {
         #[namespace = "juce"]
         type AudioProcessor;
 
+        #[namespace = "ruce"]
+        type FloatBuffer;
+
         // redeclar for local bridge functions
         type PluginProcessorImpl = crate::ruce_types::PluginProcessorImpl;
 

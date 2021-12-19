@@ -18,6 +18,7 @@ fn main() {
 
     // flags
     b.flag_if_supported("-std=c++17");
+    b.flag_if_supported("-Wno-unused-function");
 
     // modules compilation
     match target_os.as_ref().map(|x| &**x) {
