@@ -17,7 +17,7 @@ typedef __CFBundle CFBundleAlias;
 // import some cxx tools
 #include "rust/cxx.h"
 
-// import Rust code defined in 
+// import Rust code defined in
 #include "ruce/src/ruce_types.rs.h"
 
 // The main AudioProcessor class that extends JUCE Audio Processor
@@ -35,7 +35,6 @@ public:
 #endif
                            )
     {
-
     }
 
     ~RuceAudioProcessor()
@@ -53,11 +52,12 @@ public:
     //==============================================================================
     void prepareToPlay(double sampleRate, int samplesPerBlock) override
     {
-        assert(_implWrapper != nullptr);
+        // Resize the interleaved buffer
+        interleaved.setSize(1, samplesPerBlock * std::max(getTotalNumInputChannels(), getTotalNumOutputChannels()), false, false, true);
 
-        // // grab a mut ref via the boxed impl
-        PluginProcessorImpl& w = **(_implWrapper.get());
-        // // delegate
+        // grab a mut ref via the boxed impl
+        PluginProcessorImpl &w = getWrapper();
+        // delegate
         prepare_to_play(w, sampleRate, samplesPerBlock);
     }
 
@@ -102,14 +102,24 @@ public:
         for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
             buffer.clear(i, 0, buffer.getNumSamples());
 
-        rust::Slice<const float> buffer_data{buffer.getReadPointer(0), (size_t)buffer.getNumSamples()*buffer.getNumChannels()};
-        
-        assert(_implWrapper != nullptr);
+        // Interleaving so we can pass an interleaved buffer to Rust for SIMD processing
+        AudioDataConverters::interleaveSamples (buffer.getArrayOfReadPointers(), 
+                                                interleaved.getWritePointer (0),  
+                                                buffer.getNumSamples(), 
+                                                buffer.getNumChannels());            
+
+        rust::Slice<float> audio_data{interleaved.getWritePointer(0), (size_t)buffer.getNumSamples() * buffer.getNumChannels()};
 
         // grab a mut ref via the boxed impl
-        PluginProcessorImpl& w = **(_implWrapper.get());
+        PluginProcessorImpl &w = getWrapper();
         // delegate
-        process_block(w, buffer_data);
+        process_block(w, audio_data, (size_t)buffer.getNumChannels(), (size_t)buffer.getNumSamples());
+
+        // write back into desinterleaved output
+        AudioDataConverters::deinterleaveSamples (interleaved.getReadPointer(0), 
+                                                buffer.getArrayOfWritePointers (),  
+                                                buffer.getNumSamples(), 
+                                                buffer.getNumChannels()); 
     }
 
     using AudioProcessor::processBlock;
@@ -209,8 +219,18 @@ public:
     }
 
 private:
-    // manage memory of the wrapper
+    // get the wrapper instance
+    PluginProcessorImpl &getWrapper()
+    {
+        assert(_implWrapper != nullptr);
+        return **(_implWrapper.get());
+    }
+
+    // Own the memory of the Rust wrapper
     std::unique_ptr<rust::Box<::PluginProcessorImpl>> _implWrapper;
+
+    // Proxy buffer to send interleaved data to Rust wrapper.
+    AudioBuffer<float> interleaved;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RuceAudioProcessor)
@@ -220,13 +240,14 @@ private:
 // we pass the Rust impl later via the plugin factory
 juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter()
 {
-    RuceAudioProcessor* instance = new RuceAudioProcessor();
+    RuceAudioProcessor *instance = new RuceAudioProcessor();
     return instance;
 }
 
 // utilities for types conversions
-namespace ruce {
+namespace ruce
+{
     class FloatBuffer : juce::AudioBuffer<float>
-    {};
+    {
+    };
 }
-
