@@ -6,11 +6,6 @@ version = "0.1.0"
 edition = "2021"
 
 
-# members = [
-#     "ruce",
-#     "ruce_vst3",
-# ]
-
 [dependencies]
 ruce = { path = "./ruce" }
 ruce_vst3 = { path = "./ruce_vst3" }

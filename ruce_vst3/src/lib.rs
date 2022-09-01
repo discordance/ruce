@@ -2,11 +2,7 @@ use ruce::ffi::{self};
 
 #[macro_export]
 macro_rules! create_processor {
-    // first arm match add!(1,2), add!(2,3) etc
     ($a:ty) => {
-        // fn lol() {
-        //     let n : $a = <$a>::new();
-        // }
         #[no_mangle]
         #[allow(non_snake_case)]
         unsafe fn GetPluginFactory() -> *mut ffi::IPluginFactory {
@@ -20,7 +16,7 @@ macro_rules! create_processor {
     };
 }
 
-// MAC obligatory entrypoint on mac
+// entry point on mac
 #[no_mangle]
 #[allow(non_snake_case)]
 #[cfg(target_os = "macos")]
@@ -28,7 +24,7 @@ fn bundleEntry(r: *mut ffi::CFBundleAlias) -> bool {
     return unsafe { ffi::bundleEntry(r) };
 }
 
-// MAC obligatory exitpoint on mac
+// exit point on mac
 #[no_mangle]
 #[allow(non_snake_case)]
 #[cfg(target_os = "macos")]
