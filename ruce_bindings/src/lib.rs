@@ -4,8 +4,8 @@ pub mod ruce_types;
 #[cxx::bridge]
 pub mod ffi {
     unsafe extern "C++" {
-        include!("ruce/wrap/ruce.h");
-        include!("ruce/wrap/vst3_shim.h");
+        include!("ruce_bindings/wrap/ruce.h");
+        include!("ruce_bindings/wrap/vst3_shim.h");
 
         // wrapper type
         type RuceAudioProcessor;

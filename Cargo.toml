@@ -1,11 +1,11 @@
 [workspace]
 
 [package]
-name = "ruce_bindings"
+name = "ruce"
 version = "0.1.0"
 edition = "2021"
 
 
 [dependencies]
-ruce = { path = "./ruce" }
+ruce_bindings = { path = "./ruce_bindings" }
 ruce_vst3 = { path = "./ruce_vst3" }

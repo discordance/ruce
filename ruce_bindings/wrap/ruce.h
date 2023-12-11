@@ -18,7 +18,7 @@ typedef __CFBundle CFBundleAlias;
 #include "rust/cxx.h"
 
 // import Rust code defined in
-#include "ruce/src/ruce_types.rs.h"
+#include "ruce_bindings/src/ruce_types.rs.h"
 
 // The main AudioProcessor class that extends JUCE Audio Processor
 // It will delegate all the calls to the Rust code instead.

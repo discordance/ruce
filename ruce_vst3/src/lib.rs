@@ -1,4 +1,4 @@
-use ruce::ffi::{self};
+use ruce_bindings::ffi::{self};
 
 #[macro_export]
 macro_rules! create_processor {
