@@ -237,7 +237,8 @@ private:
 };
 
 // This create a new instance of the plugin
-// we pass the Rust impl later via the plugin factory
+// we pass the Rust impl later dynamically via the plugin factory
+// the type is user defined
 juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter()
 {
     RuceAudioProcessor *instance = new RuceAudioProcessor();
@@ -245,6 +246,7 @@ juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter()
 }
 
 // utilities for types conversions
+// can't use C++ templates in Rust code
 namespace ruce
 {
     class FloatBuffer : juce::AudioBuffer<float>

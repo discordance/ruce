@@ -7,7 +7,7 @@ edition = "2021"
 crate-type = ["rlib"]
 
 [dependencies]
-cxx = "1.0.54"
+cxx = "1.0.110"
 
 [build-dependencies]
 cc = { version = "1.0", features = ["parallel"] }
